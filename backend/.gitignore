@@ -1,0 +1,9 @@
+# Pasta de bibliotecas (muito pesada para o GitHub)
+node_modules/
+
+# Arquivo de segredos (NUNCA envie suas chaves do Supabase!)
+.env
+
+# Arquivos de log e sistema
+npm-debug.log
+.DS_Store
