@@ -1,5 +1,5 @@
 # Pasta de bibliotecas (muito pesada para o GitHub)
-node_modules/
+node_modules
 
 # Arquivo de segredos (NUNCA envie suas chaves do Supabase!)
 .env
