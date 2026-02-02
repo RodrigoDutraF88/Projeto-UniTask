@@ -2,6 +2,7 @@ import express from 'express' //Importa o Express, o framework que facilita a cr
 import cors from 'cors'//(Cross-Origin Resource Sharing) é uma ferramenta de segurança que permite que seu aplicativo Mobile acesse este servidor mesmo estando em "lugares" diferentes.
 import dotenv from 'dotenv'//serve para ler as variáveis de ambiente (como a porta ou chaves secretas).
 import authroutes from './src/routes/auth.routes.js'//trazendo as regras de login/registro
+import taskroute from './src/routes/tasks.routes.js'
 
 dotenv.config()//Ativa a leitura do arquivo .env para que o servidor saiba os segredos do projeto.
 
@@ -12,6 +13,7 @@ const app = express()//Cria a "instância" do seu servidor. A partir daqui, tudo
 app.use(cors())
 app.use(express.json()) //Ensina o servidor a entender mensagens enviadas no formato JSON
 app.use('/auth', authroutes) //Todas as rotas que começarem com /auth serão tratadas no arquivo auth.routes.js
+app.use('', taskroute)
 
 
 app.get('/', (req, res) => { //Ela serve apenas para você abrir no navegador e confirmar que seu backend está "vivo" e funcionando.

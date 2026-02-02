@@ -8,4 +8,10 @@ router.post('/register' , (req, res) => {
     })
 })
 
+router.post('/login' , (req, res) => {
+    res.status(200).json({
+        message: 'Usuário logado com sucesso'
+    })
+})
+
 export default router
