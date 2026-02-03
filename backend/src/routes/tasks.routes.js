@@ -7,7 +7,17 @@ router.post('/tasks', (req, res) => {
     })
 }) 
 
+router.get('/tasks' , (req,res) => {
+    res.status(200).json({
+        menssage: "Tarefa acessada com sucesso"
+    })
+})
+
 router.delete('/tasks/:id', (req, res) => {
-    res.status(204).send()
+    const id = req.params.id
+    
+    res.status(200).json({
+        menssage : `Tarefa ${id} excluída`
+    })
 })
 export default router
