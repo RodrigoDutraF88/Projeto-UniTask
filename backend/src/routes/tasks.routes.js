@@ -1,11 +1,9 @@
 
 import router from './auth.routes.js'
+import { CriarTarefa } from '../controllers/tasks.controller.js'
 
-router.post('/tasks', (req, res) => {
-    res.status(201).json({
-        menssage: "Tarefa criada com sucesso"
-    })
-}) 
+router.post('/tasks', CriarTarefa)
+    
 
 router.get('/tasks' , (req,res) => {
     res.status(200).json({
