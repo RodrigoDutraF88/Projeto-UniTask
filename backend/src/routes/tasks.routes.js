@@ -1,7 +1,9 @@
 
 import router from './auth.routes.js'
 import { CriarTarefa } from '../controllers/tasks.controller.js'
+import { authMiddleware } from '../../middlewares/auth.middlewares.js'
 
+router.use(authMiddleware)
 router.post('/tasks', CriarTarefa)
     
 

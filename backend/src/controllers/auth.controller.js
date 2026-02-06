@@ -1,29 +1,44 @@
 import supabase from '../config/supabase.js'
 import jwt from 'jsonwebtoken'
 
-export async function register(req, res){
-    const {nome, email, senha} = req.body
+export async function register(req, res) {
+  const { nome, email, senha } = req.body
 
-    if(!nome || !email || !senha){
-        res.status(400).json({
-            menssage: "Dados obrigatórios"
-        })
-    }
-
-    const { error } = await supabase
-        .from('users')
-        .insert([{nome , email , senha}])
-
-    if(error){
-        return res.status(409).json({
-            message: "Email já cadastrado"
-        })
-    }
-
-    return res.status(201).json({
-        message: "Usuário criado com sucesso"
+  if (!nome || !email || !senha) {
+    return res.status(400).json({
+      message: "Dados obrigatórios"
     })
+  }
+
+  // 1️⃣ verificar se email já existe
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', email)
+    .single()
+
+  if (existingUser) {
+    return res.status(409).json({
+      message: "Email já cadastrado"
+    })
+  }
+
+  // 2️⃣ criar usuário
+  const { error } = await supabase
+    .from('users')
+    .insert([{ nome, email, senha }])
+
+  if (error) {
+    return res.status(500).json({
+      message: "Erro ao criar usuário"
+    })
+  }
+
+  return res.status(201).json({
+    message: "Usuário criado com sucesso"
+  })
 }
+
 
 export async function login(req,res) {
     const {email, senha} = req.body
