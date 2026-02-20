@@ -4,6 +4,7 @@ import dotenv from 'dotenv'//serve para ler as variáveis de ambiente (como a po
 import authRoutes from './src/routes/auth.routes.js'//trazendo as regras de login/registro
 import taskRoutes from './src/routes/tasks.routes.js'
 import calendarRoutes from './src/routes/calendar.routes.js'
+import testRoutes from './src/routes/test.routes.js'
 
 dotenv.config()//Ativa a leitura do arquivo .env para que o servidor saiba os segredos do projeto.
 
@@ -16,6 +17,7 @@ app.use(express.json()) //Ensina o servidor a entender mensagens enviadas no for
 app.use('/auth', authRoutes) //Todas as rotas que começarem com /auth serão tratadas no arquivo auth.routes.js
 app.use('', taskRoutes)
 app.use('', calendarRoutes)
+app.use("/", testRoutes)
 
 
 app.get('/', (req, res) => { //Ela serve apenas para você abrir no navegador e confirmar que seu backend está "vivo" e funcionando.

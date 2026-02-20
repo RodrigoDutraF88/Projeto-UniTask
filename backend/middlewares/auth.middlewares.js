@@ -12,7 +12,7 @@ export function authMiddleware(req, res, next){
     const token = authHeader.split(' ')[1] //pega apenas o token, ignorando o "Bearer"
 
     try{ //capturar erro caso o token seja inválido ou expirado
-        const decoded = jwt.verify(token, process.env.JWT_SECRET) // Se tudo estiver certoretorna os dados que foram salvos no token (payload)
+        const decoded = jwt.verify(token, process.env.JWT_SECRET) // Se tudo estiver certo retorna os dados que foram salvos no token (payload)
 
         req.userId = decoded.id // pega o id que estava dentro do token e salva em req.userId
 
