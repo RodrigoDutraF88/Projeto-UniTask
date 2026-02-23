@@ -1,23 +1,22 @@
+import { Router } from 'express';
+import { CriarTarefa, ObterTarefas, AtualizarTarefa, ExcluirTarefa } from '../controllers/tasks.controller.js';
+import { authMiddleware } from '../../middlewares/auth.middlewares.js';
 
-import router from './auth.routes.js'
-import { CriarTarefa } from '../controllers/tasks.controller.js'
-import { authMiddleware } from '../../middlewares/auth.middlewares.js'
+const router = Router();
 
-router.use(authMiddleware) //todas as rotas abaixo dela automaticamente exigirão que o usuário esteja autenticado.
-router.post('/tasks', CriarTarefa) //Segue o padrão de usar uma função importada do controller (CriarTarefa)
-    
+// Aplica o middleware de autenticação a todas as rotas abaixo
+router.use(authMiddleware);
 
-router.get('/tasks' , (req,res) => {
-    res.status(200).json({
-        menssage: "Tarefa acessada com sucesso"
-    })
-})
+// Rota para criar uma nova tarefa
+router.post('/tasks', CriarTarefa);
 
-router.delete('/tasks/:id', (req, res) => {
-    const id = req.params.id
-    
-    res.status(200).json({
-        menssage : `Tarefa ${id} excluída`
-    })
-})
-export default router
+// Rota para obter todas as tarefas do usuário autenticado
+router.get('/tasks', ObterTarefas);
+
+// Rota para atualizar uma tarefa específica
+router.put('/tasks/:id', AtualizarTarefa);
+
+// Rota para excluir uma tarefa específica
+router.delete('/tasks/:id', ExcluirTarefa);
+
+export default router;

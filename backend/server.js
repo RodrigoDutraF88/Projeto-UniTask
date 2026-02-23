@@ -29,5 +29,3 @@ const PORT = process.env.PORT || 3000 //Ele tenta pegar a porta do arquivo .env 
 app.listen(PORT, () => { //É o comando que efetivamente "liga" o motor. Ele trava o terminal e fica esperando conexões
   console.log(`🔥 Servidor rodando na porta ${PORT}`)
 })
-
-
