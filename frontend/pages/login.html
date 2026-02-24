@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniTask - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,30 +15,62 @@
 
         body {
             background: linear-gradient(135deg, #56dd51 0%, #2ff19d 100%);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
         }
 
         .login-card {
             background-color: white;
             padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
             width: 100%;
             max-width: 400px;
             text-align: center;
         }
 
-        h1 {
-            color: #1a1a1a;
-            font-size: 2.5rem;
-            font-weight: 600;
+        /* ===== LOGO ===== */
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
             margin-bottom: 2rem;
-            letter-spacing: -1px;
         }
 
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #56dd51, #2ff19d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 18px rgba(46, 204, 113, 0.4);
+            flex-shrink: 0;
+        }
+
+        .logo-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .logo-wordmark {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1;
+            color: #1a1a1a;
+        }
+
+        .logo-wordmark span {
+            color: #22c55e;
+        }
+
+        /* ===== FORM ===== */
         .input-group {
             text-align: left;
             margin-bottom: 1.2rem;
@@ -46,58 +78,66 @@
 
         label {
             display: block;
-            font-size: 0.875rem;
-            color: #666;
-            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 0.4rem;
         }
 
         input {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
             outline: none;
+            color: #374151;
         }
 
         input:focus {
             border-color: #22c55e;
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
         }
 
-        button {
+        input::placeholder { color: #9ca3af; }
+
+        button[type="submit"] {
             width: 100%;
-            padding: 12px;
+            padding: 13px;
             background-color: #4f46e5;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
+            transition: background-color 0.25s, transform 0.15s, box-shadow 0.25s;
             margin-top: 1rem;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+            letter-spacing: 0.02em;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #4338ca;
+            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.45);
+            transform: translateY(-1px);
         }
 
-        button:active {
+        button[type="submit"]:active {
             transform: scale(0.98);
         }
 
         .footer-text {
             margin-top: 1.5rem;
-            font-size: 0.875rem;
-            color: #666;
+            font-size: 0.85rem;
+            color: #6b7280;
         }
 
         .footer-text a {
             color: #4f46e5;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .footer-text a:hover {
@@ -108,8 +148,20 @@
 <body>
 
     <div class="login-card">
-        <h1>UniTask</h1>
-        
+
+        <!-- LOGO -->
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="4,14 10,21 18,8" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="14" y1="10" x2="25" y2="10" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                    <line x1="14" y1="16" x2="23" y2="16" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                    <line x1="14" y1="22" x2="25" y2="22" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                </svg>
+            </div>
+            <div class="logo-wordmark">Uni<span>Task</span></div>
+        </div>
+
         <form>
             <div class="input-group">
                 <label for="email">Email</label>
