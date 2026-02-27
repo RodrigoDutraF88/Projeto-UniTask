@@ -151,7 +151,7 @@
     <div class="top-bar">
         <h1>Minhas Tarefas</h1>
         <div>
-            <button onclick="alert('Minha Conta')">Minha Conta</button>
+            <button onclick="showAccount()">Minha Conta</button>
             <button onclick="logout()">Logout</button>
         </div>
     </div>
@@ -173,82 +173,41 @@
 
 </div>
 
-<script>
-    let tasks = [];
+<script type="module">
+    import { authAPI } from '../js/api.js';
+    import { tasksAPI } from '../js/tasks.js';
 
+    // Função para adicionar tarefa - chama a função do TaskManager
     function addTask() {
         const input = document.getElementById("taskInput");
         const text = input.value.trim();
-
-        if (text === "") {
-            alert("Digite uma tarefa!");
-            return;
+        
+        if(window.taskManager) {
+            window.taskManager.addTask(text);
+            input.value = "";
         }
-
-        tasks.push({
-            id: Date.now(),
-            text: text,
-            completed: false
-        });
-
-        input.value = "";
-        renderTasks();
     }
 
-    function toggleTask(id) {
-        tasks = tasks.map(task => {
-            if (task.id === id) {
-                task.completed = !task.completed;
-            }
-            return task;
-        });
-        renderTasks();
+    // Função para logout
+    async function logout() {
+        authAPI.logout();
+        window.location.href = "./login.html";
     }
 
-    function deleteTask(id) {
-        tasks = tasks.filter(task => task.id !== id);
-        renderTasks();
+    // Função para mostrar conta
+    function showAccount() {
+        alert('Página de conta será implementada em breve!');
     }
 
-    function renderTasks() {
-        const list = document.getElementById("taskList");
-        list.innerHTML = "";
-
-        tasks.forEach(task => {
-            const li = document.createElement("li");
-            li.className = "task-item";
-            if (task.completed) li.classList.add("completed");
-
-            li.innerHTML = `
-                <span>${task.text}</span>
-                <div class="task-actions">
-                    <button class="complete-btn" onclick="toggleTask(${task.id})">
-                        ${task.completed ? "Desfazer" : "Concluir"}
-                    </button>
-                    <button class="delete-btn" onclick="deleteTask(${task.id})">
-                        Excluir
-                    </button>
-                </div>
-            `;
-
-            list.appendChild(li);
-        });
-
-        updateCounter();
-    }
-
-    function updateCounter() {
-        const total = tasks.length;
-        const completed = tasks.filter(t => t.completed).length;
-
-        document.getElementById("counter").innerText =
-            `Total: ${total} | Concluídas: ${completed}`;
-    }
-
-    function logout() {
-        window.location.href = "login.html";
-    }
+    // Função para verificar autenticação
+    document.addEventListener('DOMContentLoaded', function() {
+        if(!authAPI.isAuthenticated()) {
+            window.location.href = "./login.html";
+        }
+    });
 </script>
+
+<script type="module" src="../js/tasks.js"></script>
 
 </body>
 </html>
