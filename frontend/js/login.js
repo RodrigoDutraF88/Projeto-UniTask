@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-          // Chama a função de registro da API
+          // Chama a função de registro da API do backend
           const response = await authAPI.register({
             nome: name,
             email: email,
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-          // Chama a função de login da API
+          // Chama a função de login da API do backend
           const response = await authAPI.login({
             email: email,
             senha: password

@@ -325,9 +325,6 @@
         </a>
 
         <div class="top-buttons">
-            <button onclick="alert('Minha Conta')">Minha Conta</button>
-        <h1>Minhas Tarefas</h1>
-        <div>
             <button onclick="showAccount()">Minha Conta</button>
             <button onclick="logout()">Logout</button>
         </div>
@@ -355,8 +352,8 @@
     </div>
 </div>
 
+<!-- Script antigo para funcionalidades de calendário -->
 <script>
-    let tasks = JSON.parse(localStorage.getItem('unitasks')) || [];
     let currentDate = new Date();
     let selectedDate = new Date().toDateString();
 
@@ -392,7 +389,6 @@
 
             if (dateString === new Date().toDateString()) dayEl.classList.add("today");
             if (dateString === selectedDate) dayEl.classList.add("selected");
-            if (tasks.some(t => t.date === dateString)) dayEl.classList.add("has-task");
 
             dayEl.onclick = () => selectDate(dateString);
             grid.appendChild(dayEl);
@@ -404,68 +400,28 @@
         const dateObj = new Date(dateStr);
         document.getElementById("selectedDateDisplay").innerText = `Tarefas de ${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
         renderCalendar();
-        renderTasks();
+        // A atualização das tarefas será feita pelo TaskManager
+        if(window.taskManager) {
+            window.taskManager.updateSelectedDate(dateStr);
+        }
     }
 
     function changeMonth(diff) {
         currentDate.setMonth(currentDate.getMonth() + diff);
         renderCalendar();
     }
+</script>
+
+<!-- Script principal com módulo para integração com backend -->
 <script type="module">
     import { authAPI } from '../js/api.js';
-    import { tasksAPI } from '../js/tasks.js';
 
     // Função para adicionar tarefa - chama a função do TaskManager
     function addTask() {
         const input = document.getElementById("taskInput");
         const text = input.value.trim();
-        if (text === "") return;
-        tasks.push({ id: Date.now(), text, completed: false, date: selectedDate });
-        input.value = "";
-        saveAndRender();
-    }
-
-    function toggleTask(id) {
-        tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-        saveAndRender();
-    }
-
-    function deleteTask(id) {
-        tasks = tasks.filter(t => t.id !== id);
-        saveAndRender();
-    }
-
-    function renderTasks() {
-        const list = document.getElementById("taskList");
-        list.innerHTML = "";
-        const filteredTasks = tasks.filter(t => t.date === selectedDate);
-
-        filteredTasks.forEach(task => {
-            const li = document.createElement("li");
-            li.className = `task-item ${task.completed ? 'completed' : ''}`;
-            li.innerHTML = `
-                <span>${task.text}</span>
-                <div class="task-btns">
-                    <button class="complete-btn" onclick="toggleTask(${task.id})">${task.completed ? 'Desfazer' : 'OK'}</button>
-                    <button class="delete-btn" onclick="deleteTask(${task.id})">Sair</button>
-                </div>
-            `;
-            list.appendChild(li);
-        });
-
-        const completedCount = filteredTasks.filter(t => t.completed).length;
-        document.getElementById("counter").innerHTML = `Total no dia: <strong>${filteredTasks.length}</strong> | Concluídas: <strong>${completedCount}</strong>`;
-    }
-
-    function saveAndRender() {
-        localStorage.setItem('unitasks', JSON.stringify(tasks));
-        renderCalendar();
-        renderTasks();
-    }
-
-    function logout() { alert("Logout efetuado!"); }
-
-    selectDate(new Date().toDateString());
+        
+        if(text === "") return;
         
         if(window.taskManager) {
             window.taskManager.addTask(text);
@@ -474,7 +430,7 @@
     }
 
     // Função para logout
-    async function logout() {
+    function logout() {
         authAPI.logout();
         window.location.href = "./login.html";
     }
@@ -486,8 +442,14 @@
 
     // Função para verificar autenticação
     document.addEventListener('DOMContentLoaded', function() {
+        // Verifica se o usuário está autenticado
         if(!authAPI.isAuthenticated()) {
+            // Se não estiver autenticado, redireciona para login
             window.location.href = "./login.html";
+        }
+        // Inicializa o TaskManager
+        if(window.taskManager) {
+            window.taskManager.updateSelectedDate(selectedDate);
         }
     });
 </script>
