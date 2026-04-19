@@ -12,7 +12,6 @@ export async function register(req, res) {
     })
   }
 
-  // 1️⃣ verificar se email já existe
   const { data: existingUser, error: existingUserError } = await supabase
     .from('users')
     .select('id')
@@ -26,11 +25,11 @@ export async function register(req, res) {
     })
   }
 
-  // Criptografa a senha antes de salvar
+
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(senha, saltRounds);
 
-  // 2️⃣ criar usuário
+
   const { error } = await supabase
     .from('users')
     .insert([{ nome, email, senha: hashedPassword }])
@@ -62,24 +61,24 @@ export async function login(req, res) {
     })
   }
 
-  // Verifica se a senha está criptografada no banco de dados
+
   let isPasswordValid = false;
   
   if (!user.senha) {
-    // Se não há senha armazenada (caso raro), retorna erro
+
     return res.status(401).json({
       message: "Credenciais inválidas"
     });
   }
   
-  // Verifica se a senha está no formato de hash bcrypt
+
   const isValidHash = typeof user.senha === 'string' && user.senha.startsWith('$2');
   
   if (isValidHash) {
-    // Se a senha está criptografada, compara usando bcrypt
+
     isPasswordValid = await bcrypt.compare(senha, user.senha);
   } else {
-    // Se a senha não está criptografada, faz comparação direta (para retrocompatibilidade)
+
     isPasswordValid = user.senha === senha;
   }
   
