@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import authRoutes from './src/routes/auth.routes.js'
 import taskRoutes from './src/routes/tasks.routes.js'
 import calendarRoutes from './src/routes/calendar.routes.js'
-import testRoutes from './src/routes/test.routes.js'
+
 
 dotenv.config()
 
@@ -16,7 +16,7 @@ app.use(express.json())
 app.use('/auth', authRoutes) 
 app.use('', taskRoutes)
 app.use('', calendarRoutes)
-app.use("/", testRoutes)
+
 
 
 app.get('/', (req, res) => { 

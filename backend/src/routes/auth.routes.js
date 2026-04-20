@@ -15,11 +15,5 @@ router.get('/me', authMiddleware, (req, res) => { //Aqui você usa o middleware.
     })
 })
 
-router.get('/debug', authMiddleware, (req, res) => {
-  return res.json({
-    userId: req.userId
-  })
-})
-
 
 export default router
