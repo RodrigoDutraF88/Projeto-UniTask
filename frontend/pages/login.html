@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTask - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="auth-page">
+
+    <div class="login-card">
+
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="4,14 10,21 18,8" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="14" y1="10" x2="25" y2="10" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                    <line x1="14" y1="16" x2="23" y2="16" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                    <line x1="14" y1="22" x2="25" y2="22" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                </svg>
+            </div>
+            <div class="logo-wordmark">Uni<span>Task</span></div>
+        </div>
+
+
+        <p id="errorMsg" style="display:none; margin-bottom: 1rem; font-size: 0.85rem;"></p>
+
+        <form id="authForm">
+
+ 
+            <div class="input-group" id="nomeGroup" style="display:none;">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" placeholder="Seu nome completo">
+            </div>
+
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="seu@email.com" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" id="submitBtn">Entrar</button>
+        </form>
+
+        <p class="footer-text">
+            <span id="toggleText">Não tem conta? </span>
+            <a href="#" id="toggleLink">Cadastre-se</a>
+        </p>
+    </div>
+
+  
+    <script type="module" src="../js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTask - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="home-page">
+
+<div class="container">
+
+    <div class="top-bar">
+        <a class="logo" href="#">
+            <div class="logo-icon">
+                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="4,14 10,21 18,8" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="14" y1="10" x2="25" y2="10" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                    <line x1="14" y1="16" x2="23" y2="16" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                    <line x1="14" y1="22" x2="25" y2="22" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+                </svg>
+            </div>
+            <div class="logo-wordmark">Uni<span>Task</span></div>
+        </a>
+
+        <div class="top-buttons">
+            <button class="btn" id="btnConta">Minha Conta</button>
+            <button class="btn" id="btnLogout">Logout</button>
+        </div>
+    </div>
+
+
+    <div class="main-content">
+
+        <div class="card">
+            <div class="calendar-header">
+                <button class="cal-nav" id="prevMonth">&lt;</button>
+                <h3 id="monthTitle"></h3>
+                <button class="cal-nav" id="nextMonth">&gt;</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+
+
+        <div class="card">
+            <h3 class="selected-date-title" id="selectedDateDisplay">Tarefas de hoje</h3>
+            <div class="task-input">
+                <input type="text" id="taskInput" placeholder="O que precisa ser feito?">
+                <button class="btn-add" id="btnAddTask">Adicionar</button>
+            </div>
+            <ul class="task-list" id="taskList"></ul>
+            <div class="counter" id="counter">Total no dia: 0 | Concluídas: 0</div>
+        </div>
+
+    </div>
+</div>
+
+<script type="module" src="../js/home.js"></script>
+</body>
+</html>
