@@ -1,9 +1,9 @@
 const API_URL = 'http://localhost:3000'
 
-
 function getToken() {
   return localStorage.getItem('token')
 }
+
 function buildHeaders(requiresAuth = false) {
   const headers = { 'Content-Type': 'application/json' }
   if (requiresAuth) {
@@ -16,15 +16,11 @@ async function request(endpoint, options = {}) {
   try {
     const response = await fetch(`${API_URL}${endpoint}`, options)
     const data = await response.json()
-
     if (!response.ok) {
-
       throw new Error(data.message || 'Erro desconhecido')
     }
-
     return data
   } catch (err) {
-
     throw err
   }
 }
@@ -46,8 +42,10 @@ export async function apiRegister(nome, email, senha) {
   })
 }
 
+
 export async function apiGetTasks(date) {
-  return request(`/tasks?date=${date}`, {
+  const query = date ? `?date=${encodeURIComponent(date)}` : ''
+  return request(`/tasks${query}`, {
     method: 'GET',
     headers: buildHeaders(true)
   })
@@ -73,5 +71,30 @@ export async function apiToggleTask(id, completed) {
     method: 'PATCH',
     headers: buildHeaders(true),
     body: JSON.stringify({ completed })
+  })
+}
+
+
+
+export async function apiCreateEvent(titulo, date) {
+  return request('/calendar', {
+    method: 'POST',
+    headers: buildHeaders(true),
+    body: JSON.stringify({ titulo, date })
+  })
+}
+
+export async function apiGetEvents(date) {
+  const query = date ? `?date=${encodeURIComponent(date)}` : ''
+  return request(`/calendar${query}`, {
+    method: 'GET',
+    headers: buildHeaders(true)
+  })
+}
+
+export async function apiDeleteEvent(id) {
+  return request(`/calendar/${id}`, {
+    method: 'DELETE',
+    headers: buildHeaders(true)
   })
 }

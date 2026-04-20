@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTask — Minha Conta</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="home-page">
+    <div class="top-bar">
+        <a class="logo" href="./home.html">
+            <div class="logo-icon">
+                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="4,14 10,21 18,8" stroke="#00e67a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="14" y1="10" x2="25" y2="10" stroke="#00e67a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    <line x1="14" y1="16" x2="23" y2="16" stroke="#00e67a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    <line x1="14" y1="22" x2="25" y2="22" stroke="#00e67a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                </svg>
+            </div>
+            <div class="logo-wordmark">Uni<span>Task</span></div>
+        </a>
+        <div class="top-buttons">
+            <button class="btn" id="btnHome">← Voltar</button>
+            <button class="btn" id="btnLogout">Logout</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="account-grid">
+            <div class="card account-card">
+                <div class="avatar" id="avatarInitial">?</div>
+                <h2 class="account-name" id="userName">Carregando...</h2>
+                <p class="account-email" id="userEmail">--</p>
+                <div class="account-divider"></div>
+                <button class="btn-logout-full" id="btnLogoutFull">Sair da conta</button>
+            </div>
+            <div class="card stats-card">
+                <h3 class="stats-title">Resumo de tarefas</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="statTotal">--</span>
+                        <span class="stat-label">Total</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number green" id="statCompleted">--</span>
+                        <span class="stat-label">Concluídas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number indigo" id="statPending">--</span>
+                        <span class="stat-label">Pendentes</span>
+                    </div>
+                </div>
+                <div class="progress-wrap">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <span class="progress-label" id="progressLabel">0% concluído</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="../js/account.js"></script>
+</body>
+</html>

@@ -1,30 +1,14 @@
-import router from './auth.routes.js'
+import { Router } from 'express'
+import { criarEvento, listarEventos, deletarEvento } from '../controllers/calendar.controller.js'
+import { authMiddleware } from '../../middlewares/auth.middlewares.js'
 
-router.post('/calendar' , (req,res) => { 
-    res.status(201).json({
-        menssage: "Evento criado"
-    })
-})
+const router = Router()
 
-router.get('/calendar', (req,res) => { 
-    res.status(200).json({
-        menssage: "Eventos acessados com sucesso"
-    })
-})
-
-router.delete('/calendar/:id' , (req ,res) => { 
-    const id = req.params.id
-
-    res.status(200).json({
-        menssage: `Evento ${id} excluído`
-    })
-})
-
-
+router.post('/calendar', authMiddleware, criarEvento)
+router.get('/calendar', authMiddleware, listarEventos)
+router.delete('/calendar/:id', authMiddleware, deletarEvento)
 
 export default router
-
-
 
 
 
