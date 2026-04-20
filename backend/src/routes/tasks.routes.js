@@ -1,23 +1,13 @@
-
-import router from './auth.routes.js'
-import { CriarTarefa } from '../controllers/tasks.controller.js'
+import { Router } from 'express'
+import { criarTarefa, listarTarefas, completarTarefa, deletarTarefa } from '../controllers/tasks.controller.js'
 import { authMiddleware } from '../../middlewares/auth.middlewares.js'
 
-router.use(authMiddleware) 
-router.post('/tasks', CriarTarefa) 
-    
+const router = Router()
 
-router.get('/tasks' , (req,res) => {
-    res.status(200).json({
-        menssage: "Tarefa acessada com sucesso"
-    })
-})
 
-router.delete('/tasks/:id', (req, res) => {
-    const id = req.params.id
-    
-    res.status(200).json({
-        menssage : `Tarefa ${id} excluída`
-    })
-})
+router.post('/tasks', authMiddleware, criarTarefa)
+router.get('/tasks', authMiddleware, listarTarefas)
+router.patch('/tasks/:id', authMiddleware, completarTarefa)
+router.delete('/tasks/:id', authMiddleware, deletarTarefa)
+
 export default router
