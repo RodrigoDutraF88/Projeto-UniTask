@@ -35,6 +35,10 @@ export async function register(req, res) {
 export async function login(req, res) {
   const { email, senha } = req.body
 
+  if (!email || !senha) {
+    return res.status(400).json({ message: 'Dados obrigatórios' })
+  }
+
   const { data: user, error } = await supabase
     .from('users')
     .select('*')
@@ -45,9 +49,7 @@ export async function login(req, res) {
     return res.status(401).json({ message: 'Credenciais inválidas' })
   }
 
-  const isPasswordValid = user.senha.startsWith('$2')
-    ? await bcrypt.compare(senha, user.senha)
-    : user.senha === senha
+  const isPasswordValid = await bcrypt.compare(senha, user.senha)
 
   if (!isPasswordValid) {
     return res.status(401).json({ message: 'Credenciais inválidas' })
@@ -59,10 +61,6 @@ export async function login(req, res) {
     { expiresIn: '1d' }
   )
 
- 
   return res.json({ token, nome: user.nome })
 }
-    
-
-    
     

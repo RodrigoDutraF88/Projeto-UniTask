@@ -4,15 +4,14 @@ if (!localStorage.getItem('token')) {
   window.location.href = './login.html'
 }
 
-let tasks       = JSON.parse(localStorage.getItem('unitasks')) || []
-let currentDate = new Date()
-let selectedDate = new Date().toDateString()
+let tasks        = []
+let currentDate  = new Date()
+let selectedDate = toISODate(new Date())
 
 const monthNames = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
 ]
-
 
 const calendarGrid        = document.getElementById('calendarGrid')
 const monthTitle          = document.getElementById('monthTitle')
@@ -20,7 +19,6 @@ const taskInput           = document.getElementById('taskInput')
 const taskList            = document.getElementById('taskList')
 const counter             = document.getElementById('counter')
 const selectedDateDisplay = document.getElementById('selectedDateDisplay')
-
 
 document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1))
 document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1))
@@ -34,6 +32,12 @@ taskInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') addTask()
 })
 
+function toISODate(date) {
+  const year  = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day   = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 function renderCalendar() {
   calendarGrid.innerHTML = ''
@@ -41,7 +45,6 @@ function renderCalendar() {
   const year  = currentDate.getFullYear()
   const month = currentDate.getMonth()
   monthTitle.innerText = `${monthNames[month]} ${year}`
-
 
   const daysOfWeek = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
   daysOfWeek.forEach(day => {
@@ -51,36 +54,36 @@ function renderCalendar() {
     calendarGrid.appendChild(el)
   })
 
-
   const firstDay    = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const todayISO    = toISODate(new Date())
 
   for (let i = 0; i < firstDay; i++) {
     calendarGrid.appendChild(document.createElement('div'))
   }
 
-
   for (let i = 1; i <= daysInMonth; i++) {
-    const dateString = new Date(year, month, i).toDateString()
-    const dayEl = document.createElement('div')
+    const dateISO = toISODate(new Date(year, month, i))
+    const dayEl   = document.createElement('div')
     dayEl.className = 'day'
     dayEl.innerText = i
 
-    if (dateString === new Date().toDateString()) dayEl.classList.add('today')
-    if (dateString === selectedDate)              dayEl.classList.add('selected')
-    if (tasks.some(t => t.date === dateString))   dayEl.classList.add('has-task')
+    if (dateISO === todayISO)    dayEl.classList.add('today')
+    if (dateISO === selectedDate) dayEl.classList.add('selected')
+    if (tasks.some(t => t.date === dateISO)) dayEl.classList.add('has-task')
 
-    dayEl.addEventListener('click', () => selectDate(dateString))
+    dayEl.addEventListener('click', () => selectDate(dateISO))
     calendarGrid.appendChild(dayEl)
   }
 }
 
-function selectDate(dateStr) {
+async function selectDate(dateStr) {
   selectedDate = dateStr
-  const dateObj = new Date(dateStr)
-  selectedDateDisplay.innerText = `Tarefas de ${dateObj.getDate()}/${dateObj.getMonth() + 1}`
-  renderCalendar()
-  renderTasks()
+
+  const [year, month, day] = dateStr.split('-')
+  selectedDateDisplay.innerText = `Tarefas de ${Number(day)}/${Number(month)}`
+
+  await fetchAndRender()
 }
 
 function changeMonth(diff) {
@@ -88,36 +91,48 @@ function changeMonth(diff) {
   renderCalendar()
 }
 
-
-function addTask() {
+async function addTask() {
   const text = taskInput.value.trim()
   if (!text) return
 
-  tasks.push({ id: Date.now(), text, completed: false, date: selectedDate })
   taskInput.value = ''
-  saveAndRender()
+
+  try {
+    await apiCreateTask(text, selectedDate)
+    await fetchAndRender()
+  } catch {
+    taskInput.value = text
+    showError('Não foi possível adicionar a tarefa.')
+  }
 }
 
-function toggleTask(id) {
-  tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t)
-  saveAndRender()
+async function toggleTask(id, currentState) {
+  try {
+    await apiToggleTask(id, !currentState)
+    await fetchAndRender()
+  } catch {
+    showError('Não foi possível atualizar a tarefa.')
+  }
 }
 
-function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id)
-  saveAndRender()
+async function deleteTask(id) {
+  try {
+    await apiDeleteTask(id)
+    await fetchAndRender()
+  } catch {
+    showError('Não foi possível excluir a tarefa.')
+  }
 }
 
 function renderTasks() {
   taskList.innerHTML = ''
-  const filtered = tasks.filter(t => t.date === selectedDate)
 
-  filtered.forEach(task => {
+  tasks.forEach(task => {
     const li = document.createElement('li')
     li.className = `task-item ${task.completed ? 'completed' : ''}`
 
     const span = document.createElement('span')
-    span.textContent = task.text
+    span.textContent = task.titulo
 
     const btns = document.createElement('div')
     btns.className = 'task-btns'
@@ -125,7 +140,7 @@ function renderTasks() {
     const completeBtn = document.createElement('button')
     completeBtn.className = 'btn-complete'
     completeBtn.textContent = task.completed ? 'Desfazer' : 'OK'
-    completeBtn.addEventListener('click', () => toggleTask(task.id))
+    completeBtn.addEventListener('click', () => toggleTask(task.id, task.completed))
 
     const deleteBtn = document.createElement('button')
     deleteBtn.className = 'btn-delete'
@@ -139,20 +154,40 @@ function renderTasks() {
     taskList.appendChild(li)
   })
 
-  const completedCount = filtered.filter(t => t.completed).length
-  counter.innerHTML = `Total no dia: <strong>${filtered.length}</strong> | Concluídas: <strong>${completedCount}</strong>`
+  const completedCount = tasks.filter(t => t.completed).length
+  counter.innerHTML = `Total no dia: <strong>${tasks.length}</strong> | Concluídas: <strong>${completedCount}</strong>`
 }
 
-function saveAndRender() {
-  localStorage.setItem('unitasks', JSON.stringify(tasks))
+async function fetchAndRender() {
+  try {
+    tasks = await apiGetTasks(selectedDate)
+  } catch {
+    tasks = []
+    showError('Erro ao carregar tarefas.')
+  }
+
   renderCalendar()
   renderTasks()
 }
 
+function showError(msg) {
+  const existing = document.getElementById('homeError')
+  if (existing) existing.remove()
+
+  const el = document.createElement('p')
+  el.id = 'homeError'
+  el.textContent = msg
+  el.style.cssText = 'color:#ff4d4d;font-size:0.8rem;margin-bottom:0.75rem;'
+  taskList.before(el)
+
+  setTimeout(() => el.remove(), 3500)
+}
 
 function logout() {
   localStorage.removeItem('token')
+  localStorage.removeItem('userName')
+  localStorage.removeItem('userEmail')
   window.location.href = './login.html'
 }
 
-selectDate(new Date().toDateString())
+selectDate(toISODate(new Date()))
