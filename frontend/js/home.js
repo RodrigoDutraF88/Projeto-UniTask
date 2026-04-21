@@ -19,6 +19,8 @@ const taskInput           = document.getElementById('taskInput')
 const taskList            = document.getElementById('taskList')
 const counter             = document.getElementById('counter')
 const selectedDateDisplay = document.getElementById('selectedDateDisplay')
+const weekChart           = document.getElementById('weekChart')
+const chartHeadline       = document.getElementById('chartHeadline')
 
 document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1))
 document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1))
@@ -37,6 +39,89 @@ function toISODate(date) {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day   = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+function getLast7Days() {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (6 - i))
+    return toISODate(d)
+  })
+}
+
+async function renderChart() {
+  const allTasks = await apiGetTasks()
+  const days     = getLast7Days()
+
+  const data = days.map(date => {
+    const dayTasks = allTasks.filter(t => t.date === date)
+    return {
+      date,
+      total:     dayTasks.length,
+      completed: dayTasks.filter(t => t.completed).length
+    }
+  })
+
+  const totalWeek     = data.reduce((s, d) => s + d.total, 0)
+  const completedWeek = data.reduce((s, d) => s + d.completed, 0)
+  chartHeadline.textContent = `${completedWeek} de ${totalWeek} concluídas`
+
+  drawChart(data)
+}
+
+function drawChart(data) {
+  const canvas = weekChart
+  const ctx    = canvas.getContext('2d')
+  const dpr    = window.devicePixelRatio || 1
+  const width  = canvas.offsetWidth
+  const height = canvas.offsetHeight
+
+  canvas.width  = width * dpr
+  canvas.height = height * dpr
+  ctx.scale(dpr, dpr)
+  ctx.clearRect(0, 0, width, height)
+
+  const maxVal   = Math.max(...data.map(d => d.total), 1)
+  const groupW   = width / data.length
+  const barW     = Math.floor(groupW * 0.28)
+  const gap      = 3
+  const paddingB = 22
+  const chartH   = height - paddingB
+
+  const green  = '#00e676'
+  const dimBar = 'rgba(255,255,255,0.07)'
+  const dimTxt = 'rgba(255,255,255,0.28)'
+
+  data.forEach((d, i) => {
+    const x      = i * groupW + groupW / 2
+    const totalH = (d.total / maxVal) * chartH
+    const doneH  = (d.completed / maxVal) * chartH
+
+    const x1 = x - barW - gap / 2
+    const x2 = x + gap / 2
+
+    ctx.fillStyle = dimBar
+    ctx.beginPath()
+    ctx.roundRect(x1, chartH - totalH, barW, totalH, [3, 3, 0, 0])
+    ctx.fill()
+
+    if (d.completed > 0) {
+      ctx.fillStyle = green
+      ctx.beginPath()
+      ctx.roundRect(x2, chartH - doneH, barW, doneH, [3, 3, 0, 0])
+      ctx.fill()
+    } else {
+      ctx.fillStyle = dimBar
+      ctx.beginPath()
+      ctx.roundRect(x2, chartH - 2, barW, 2, [1, 1, 0, 0])
+      ctx.fill()
+    }
+
+    ctx.fillStyle = dimTxt
+    ctx.font      = '11px DM Sans, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(d.date.slice(8), x, height - 4)
+  })
 }
 
 function renderCalendar() {
@@ -68,7 +153,7 @@ function renderCalendar() {
     dayEl.className = 'day'
     dayEl.innerText = i
 
-    if (dateISO === todayISO)    dayEl.classList.add('today')
+    if (dateISO === todayISO)     dayEl.classList.add('today')
     if (dateISO === selectedDate) dayEl.classList.add('selected')
     if (tasks.some(t => t.date === dateISO)) dayEl.classList.add('has-task')
 
@@ -79,10 +164,8 @@ function renderCalendar() {
 
 async function selectDate(dateStr) {
   selectedDate = dateStr
-
-  const [year, month, day] = dateStr.split('-')
+  const [, month, day] = dateStr.split('-')
   selectedDateDisplay.innerText = `Tarefas de ${Number(day)}/${Number(month)}`
-
   await fetchAndRender()
 }
 
@@ -100,6 +183,7 @@ async function addTask() {
   try {
     await apiCreateTask(text, selectedDate)
     await fetchAndRender()
+    renderChart()
   } catch {
     taskInput.value = text
     showError('Não foi possível adicionar a tarefa.')
@@ -110,6 +194,7 @@ async function toggleTask(id, currentState) {
   try {
     await apiToggleTask(id, !currentState)
     await fetchAndRender()
+    renderChart()
   } catch {
     showError('Não foi possível atualizar a tarefa.')
   }
@@ -119,6 +204,7 @@ async function deleteTask(id) {
   try {
     await apiDeleteTask(id)
     await fetchAndRender()
+    renderChart()
   } catch {
     showError('Não foi possível excluir a tarefa.')
   }
@@ -177,7 +263,7 @@ function showError(msg) {
   const el = document.createElement('p')
   el.id = 'homeError'
   el.textContent = msg
-  el.style.cssText = 'color:#ff4d4d;font-size:0.8rem;margin-bottom:0.75rem;'
+  el.style.cssText = 'color:#ff5252;font-size:0.8rem;margin-bottom:0.75rem;'
   taskList.before(el)
 
   setTimeout(() => el.remove(), 3500)
@@ -190,4 +276,7 @@ function logout() {
   window.location.href = './login.html'
 }
 
+window.addEventListener('resize', renderChart)
+
 selectDate(toISODate(new Date()))
+renderChart()

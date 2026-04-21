@@ -11,10 +11,10 @@
         <a class="logo" href="#">
             <div class="logo-icon">
                 <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polyline points="4,14 10,21 18,8" stroke="#00e67a" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <line x1="14" y1="10" x2="25" y2="10" stroke="#00e67a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-                    <line x1="14" y1="16" x2="23" y2="16" stroke="#00e67a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-                    <line x1="14" y1="22" x2="25" y2="22" stroke="#00e67a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    <polyline points="4,14 10,21 18,8" stroke="#00e676" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="14" y1="10" x2="25" y2="10" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    <line x1="14" y1="16" x2="23" y2="16" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    <line x1="14" y1="22" x2="25" y2="22" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
                 </svg>
             </div>
             <div class="logo-wordmark">Uni<span>Task</span></div>
@@ -24,7 +24,22 @@
             <button class="btn" id="btnLogout">Logout</button>
         </div>
     </div>
+
     <div class="container">
+        <div class="chart-strip card">
+            <div class="chart-header">
+                <div>
+                    <p class="chart-label">Últimos 7 dias</p>
+                    <h2 class="chart-title" id="chartHeadline">—</h2>
+                </div>
+                <div class="chart-legend">
+                    <span class="legend-dot" style="background: var(--green)"></span><span>concluídas</span>
+                    <span class="legend-dot" style="background: var(--line2)"></span><span>total</span>
+                </div>
+            </div>
+            <canvas id="weekChart" height="80"></canvas>
+        </div>
+
         <div class="main-content">
             <div class="card">
                 <div class="calendar-header">
@@ -45,6 +60,7 @@
             </div>
         </div>
     </div>
+
     <script type="module" src="../js/home.js"></script>
 </body>
 </html>
