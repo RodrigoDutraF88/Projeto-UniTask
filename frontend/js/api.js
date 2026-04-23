@@ -4,97 +4,68 @@ function getToken() {
   return localStorage.getItem('token')
 }
 
-function buildHeaders(requiresAuth = false) {
-  const headers = { 'Content-Type': 'application/json' }
-  if (requiresAuth) {
-    headers['Authorization'] = `Bearer ${getToken()}`
+function authHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${getToken()}`
   }
-  return headers
+}
+
+function jsonHeaders() {
+  return { 'Content-Type': 'application/json' }
 }
 
 async function request(endpoint, options = {}) {
-  try {
-    const response = await fetch(`${API_URL}${endpoint}`, options)
-    const data = await response.json()
-    if (!response.ok) {
-      throw new Error(data.message || 'Erro desconhecido')
-    }
-    return data
-  } catch (err) {
-    throw err
-  }
+  const response = await fetch(`${API_URL}${endpoint}`, options)
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.message || 'Erro desconhecido')
+  return data
 }
 
-
-export async function apiLogin(email, senha) {
+export function apiLogin(email, senha) {
   return request('/auth/login', {
     method: 'POST',
-    headers: buildHeaders(),
+    headers: jsonHeaders(),
     body: JSON.stringify({ email, senha })
   })
 }
 
-export async function apiRegister(nome, email, senha) {
+export function apiRegister(nome, email, senha) {
   return request('/auth/register', {
     method: 'POST',
-    headers: buildHeaders(),
+    headers: jsonHeaders(),
     body: JSON.stringify({ nome, email, senha })
   })
 }
 
+export function apiGetTasks(date) {
+  const q = date ? `?date=${encodeURIComponent(date)}` : ''
+  return request(`/tasks${q}`, { method: 'GET', headers: authHeaders() })
+}
 
-export async function apiGetTasks(date) {
-  const query = date ? `?date=${encodeURIComponent(date)}` : ''
-  return request(`/tasks${query}`, {
+export function apiGetTasksRange(from, to) {
+  return request(`/tasks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, {
     method: 'GET',
-    headers: buildHeaders(true)
+    headers: authHeaders()
   })
 }
 
-export async function apiCreateTask(titulo, date) {
+export function apiCreateTask(titulo, date) {
   return request('/tasks', {
     method: 'POST',
-    headers: buildHeaders(true),
+    headers: authHeaders(),
     body: JSON.stringify({ titulo, date })
   })
 }
 
-export async function apiDeleteTask(id) {
-  return request(`/tasks/${id}`, {
-    method: 'DELETE',
-    headers: buildHeaders(true)
-  })
-}
-
-export async function apiToggleTask(id, completed) {
+export function apiToggleTask(id, completed) {
   return request(`/tasks/${id}`, {
     method: 'PATCH',
-    headers: buildHeaders(true),
+    headers: authHeaders(),
     body: JSON.stringify({ completed })
   })
 }
 
-
-
-export async function apiCreateEvent(titulo, date) {
-  return request('/calendar', {
-    method: 'POST',
-    headers: buildHeaders(true),
-    body: JSON.stringify({ titulo, date })
-  })
-}
-
-export async function apiGetEvents(date) {
-  const query = date ? `?date=${encodeURIComponent(date)}` : ''
-  return request(`/calendar${query}`, {
-    method: 'GET',
-    headers: buildHeaders(true)
-  })
-}
-
-export async function apiDeleteEvent(id) {
-  return request(`/calendar/${id}`, {
-    method: 'DELETE',
-    headers: buildHeaders(true)
-  })
+export function apiDeleteTask(id) {
+  return request(`/tasks/${id}`, { method: 'DELETE', headers: authHeaders() })
 }

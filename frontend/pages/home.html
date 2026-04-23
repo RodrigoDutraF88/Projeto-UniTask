@@ -1,66 +1,74 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UniTask — Home</title>
-    <link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>UniTask</title>
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="home-page">
-    <div class="top-bar">
-        <a class="logo" href="#">
-            <div class="logo-icon">
-                <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polyline points="4,14 10,21 18,8" stroke="#00e676" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <line x1="14" y1="10" x2="25" y2="10" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-                    <line x1="14" y1="16" x2="23" y2="16" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-                    <line x1="14" y1="22" x2="25" y2="22" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-                </svg>
-            </div>
-            <div class="logo-wordmark">Uni<span>Task</span></div>
-        </a>
-        <div class="top-buttons">
-            <button class="btn" id="btnConta">Minha Conta</button>
-            <button class="btn" id="btnLogout">Logout</button>
-        </div>
+  <div class="top-bar">
+    <a class="logo" href="#">
+      <div class="logo-icon">
+        <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="4,14 10,21 18,8" stroke="#00e676" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="14" y1="10" x2="25" y2="10" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <line x1="14" y1="16" x2="23" y2="16" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <line x1="14" y1="22" x2="25" y2="22" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="logo-wordmark">Uni<span>Task</span></div>
+    </a>
+    <div class="top-buttons">
+      <button class="btn" id="btnConta">Conta</button>
+      <button class="btn" id="btnLogout">Sair</button>
     </div>
+  </div>
 
-    <div class="container">
-        <div class="chart-strip card">
-            <div class="chart-header">
-                <div>
-                    <p class="chart-label">Últimos 7 dias</p>
-                    <h2 class="chart-title" id="chartHeadline">—</h2>
-                </div>
-                <div class="chart-legend">
-                    <span class="legend-dot" style="background: var(--green)"></span><span>concluídas</span>
-                    <span class="legend-dot" style="background: var(--line2)"></span><span>total</span>
-                </div>
-            </div>
-            <canvas id="weekChart" height="80"></canvas>
+  <div class="container">
+    <div class="main-content">
+
+      <div class="card cal-card">
+        <div class="calendar-header">
+          <button class="cal-nav" id="prevMonth">&#8249;</button>
+          <h3 id="monthTitle"></h3>
+          <button class="cal-nav" id="nextMonth">&#8250;</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <h3 class="section-title" id="selectedDateDisplay">Tarefas de hoje</h3>
+          <div class="task-input">
+            <input type="text" id="taskInput" placeholder="Nova tarefa...">
+            <button class="btn-add" id="btnAddTask">+</button>
+          </div>
+          <ul class="task-list" id="taskList"></ul>
+          <p class="counter" id="counter"></p>
         </div>
 
-        <div class="main-content">
-            <div class="card">
-                <div class="calendar-header">
-                    <button class="cal-nav" id="prevMonth">&#8249;</button>
-                    <h3 id="monthTitle"></h3>
-                    <button class="cal-nav" id="nextMonth">&#8250;</button>
-                </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="card chart-card">
+          <div class="chart-header">
+            <div class="chart-nav">
+              <button class="chart-nav-btn" id="chartPrev">&#8249;</button>
+              <span class="chart-label" id="chartRangeLabel"></span>
+              <button class="chart-nav-btn" id="chartNext">&#8250;</button>
             </div>
-            <div class="card">
-                <h3 class="selected-date-title" id="selectedDateDisplay">Tarefas de hoje</h3>
-                <div class="task-input">
-                    <input type="text" id="taskInput" placeholder="O que precisa ser feito?">
-                    <button class="btn-add" id="btnAddTask">Adicionar</button>
-                </div>
-                <ul class="task-list" id="taskList"></ul>
-                <div class="counter" id="counter">Total no dia: 0 | Concluídas: 0</div>
+            <div class="chart-legend">
+              <span class="dot green-dot"></span><span>Concluídas</span>
+              <span class="dot dim-dot"></span><span>Criadas</span>
             </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="weekChart"></canvas>
+          </div>
         </div>
+      </div>
+
     </div>
+  </div>
 
-    <script type="module" src="../js/home.js"></script>
+  <script type="module" src="../js/home.js"></script>
 </body>
 </html>

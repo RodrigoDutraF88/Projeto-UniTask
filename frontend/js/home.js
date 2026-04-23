@@ -1,11 +1,13 @@
-import { apiCreateTask, apiGetTasks, apiDeleteTask, apiToggleTask } from './api.js'
+import { apiCreateTask, apiGetTasks, apiGetTasksRange, apiDeleteTask, apiToggleTask } from './api.js'
 
 if (!localStorage.getItem('token')) {
   window.location.href = './login.html'
 }
 
-let tasks        = []
-let currentDate  = new Date()
+let tasks       = []
+let monthTasks  = []
+let chartOffset = 0
+let currentDate = new Date()
 let selectedDate = toISODate(new Date())
 
 const monthNames = [
@@ -13,187 +15,123 @@ const monthNames = [
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
 ]
 
-const calendarGrid        = document.getElementById('calendarGrid')
-const monthTitle          = document.getElementById('monthTitle')
-const taskInput           = document.getElementById('taskInput')
-const taskList            = document.getElementById('taskList')
-const counter             = document.getElementById('counter')
-const selectedDateDisplay = document.getElementById('selectedDateDisplay')
-const weekChart           = document.getElementById('weekChart')
-const chartHeadline       = document.getElementById('chartHeadline')
+const $ = id => document.getElementById(id)
 
-document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1))
-document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1))
-document.getElementById('btnAddTask').addEventListener('click', addTask)
-document.getElementById('btnLogout').addEventListener('click', logout)
-document.getElementById('btnConta').addEventListener('click', () => {
-  window.location.href = './account.html'
-})
+$('prevMonth').addEventListener('click',  () => changeMonth(-1))
+$('nextMonth').addEventListener('click',  () => changeMonth(1))
+$('btnAddTask').addEventListener('click', addTask)
+$('btnLogout').addEventListener('click',  logout)
+$('btnConta').addEventListener('click',   () => { window.location.href = './account.html' })
+$('chartPrev').addEventListener('click',  () => shiftChart(-7))
+$('chartNext').addEventListener('click',  () => shiftChart(7))
+$('taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTask() })
 
-taskInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') addTask()
-})
-
-function toISODate(date) {
-  const year  = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day   = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+function toISODate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 }
 
-function getLast7Days() {
+function chartDays() {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date()
-    d.setDate(d.getDate() - (6 - i))
+    d.setDate(d.getDate() + chartOffset - 6 + i)
     return toISODate(d)
   })
 }
 
-async function renderChart() {
-  const allTasks = await apiGetTasks()
-  const days     = getLast7Days()
-
-  const data = days.map(date => {
-    const dayTasks = allTasks.filter(t => t.date === date)
-    return {
-      date,
-      total:     dayTasks.length,
-      completed: dayTasks.filter(t => t.completed).length
-    }
-  })
-
-  const totalWeek     = data.reduce((s, d) => s + d.total, 0)
-  const completedWeek = data.reduce((s, d) => s + d.completed, 0)
-  chartHeadline.textContent = `${completedWeek} de ${totalWeek} concluídas`
-
-  drawChart(data)
+function shiftChart(delta) {
+  if (chartOffset + delta > 0) return
+  chartOffset += delta
+  renderChart()
 }
 
-function drawChart(data) {
-  const canvas = weekChart
-  const ctx    = canvas.getContext('2d')
-  const dpr    = window.devicePixelRatio || 1
-  const width  = canvas.offsetWidth
-  const height = canvas.offsetHeight
-
-  canvas.width  = width * dpr
-  canvas.height = height * dpr
-  ctx.scale(dpr, dpr)
-  ctx.clearRect(0, 0, width, height)
-
-  const maxVal   = Math.max(...data.map(d => d.total), 1)
-  const groupW   = width / data.length
-  const barW     = Math.floor(groupW * 0.28)
-  const gap      = 3
-  const paddingB = 22
-  const chartH   = height - paddingB
-
-  const green  = '#00e676'
-  const dimBar = 'rgba(255,255,255,0.07)'
-  const dimTxt = 'rgba(255,255,255,0.28)'
-
-  data.forEach((d, i) => {
-    const x      = i * groupW + groupW / 2
-    const totalH = (d.total / maxVal) * chartH
-    const doneH  = (d.completed / maxVal) * chartH
-
-    const x1 = x - barW - gap / 2
-    const x2 = x + gap / 2
-
-    ctx.fillStyle = dimBar
-    ctx.beginPath()
-    ctx.roundRect(x1, chartH - totalH, barW, totalH, [3, 3, 0, 0])
-    ctx.fill()
-
-    if (d.completed > 0) {
-      ctx.fillStyle = green
-      ctx.beginPath()
-      ctx.roundRect(x2, chartH - doneH, barW, doneH, [3, 3, 0, 0])
-      ctx.fill()
-    } else {
-      ctx.fillStyle = dimBar
-      ctx.beginPath()
-      ctx.roundRect(x2, chartH - 2, barW, 2, [1, 1, 0, 0])
-      ctx.fill()
-    }
-
-    ctx.fillStyle = dimTxt
-    ctx.font      = '11px DM Sans, sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText(d.date.slice(8), x, height - 4)
-  })
-}
-
-function renderCalendar() {
-  calendarGrid.innerHTML = ''
-
-  const year  = currentDate.getFullYear()
-  const month = currentDate.getMonth()
-  monthTitle.innerText = `${monthNames[month]} ${year}`
-
-  const daysOfWeek = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
-  daysOfWeek.forEach(day => {
-    const el = document.createElement('div')
-    el.className = 'day-name'
-    el.innerText = day
-    calendarGrid.appendChild(el)
-  })
-
-  const firstDay    = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const todayISO    = toISODate(new Date())
-
-  for (let i = 0; i < firstDay; i++) {
-    calendarGrid.appendChild(document.createElement('div'))
-  }
-
-  for (let i = 1; i <= daysInMonth; i++) {
-    const dateISO = toISODate(new Date(year, month, i))
-    const dayEl   = document.createElement('div')
-    dayEl.className = 'day'
-    dayEl.innerText = i
-
-    if (dateISO === todayISO)     dayEl.classList.add('today')
-    if (dateISO === selectedDate) dayEl.classList.add('selected')
-    if (tasks.some(t => t.date === dateISO)) dayEl.classList.add('has-task')
-
-    dayEl.addEventListener('click', () => selectDate(dateISO))
-    calendarGrid.appendChild(dayEl)
-  }
-}
-
-async function selectDate(dateStr) {
-  selectedDate = dateStr
-  const [, month, day] = dateStr.split('-')
-  selectedDateDisplay.innerText = `Tarefas de ${Number(day)}/${Number(month)}`
-  await fetchAndRender()
-}
-
-function changeMonth(diff) {
+async function changeMonth(diff) {
   currentDate.setMonth(currentDate.getMonth() + diff)
+  await loadMonthTasks()
   renderCalendar()
 }
 
+async function loadMonthTasks() {
+  const y = currentDate.getFullYear()
+  const m = currentDate.getMonth()
+  try {
+    monthTasks = await apiGetTasksRange(
+      toISODate(new Date(y, m, 1)),
+      toISODate(new Date(y, m + 1, 0))
+    )
+  } catch {
+    monthTasks = []
+  }
+}
+
+function renderCalendar() {
+  const grid = $('calendarGrid')
+  grid.innerHTML = ''
+
+  const y = currentDate.getFullYear()
+  const m = currentDate.getMonth()
+  $('monthTitle').innerText = `${monthNames[m]} ${y}`
+
+  ;['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(d => {
+    const el = document.createElement('div')
+    el.className = 'day-name'
+    el.innerText = d
+    grid.appendChild(el)
+  })
+
+  const firstDay    = new Date(y, m, 1).getDay()
+  const daysInMonth = new Date(y, m + 1, 0).getDate()
+  const todayISO    = toISODate(new Date())
+
+  for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'))
+
+  for (let i = 1; i <= daysInMonth; i++) {
+    const iso = toISODate(new Date(y, m, i))
+    const el  = document.createElement('div')
+    el.className = 'day'
+    el.innerText = i
+    if (iso === todayISO)    el.classList.add('today')
+    if (iso === selectedDate) el.classList.add('selected')
+    if (monthTasks.some(t => t.date === iso)) el.classList.add('has-task')
+    el.addEventListener('click', () => selectDate(iso))
+    grid.appendChild(el)
+  }
+}
+
+async function selectDate(iso) {
+  selectedDate = iso
+  const [, m, d] = iso.split('-')
+  $('selectedDateDisplay').innerText = `Tarefas de ${+d}/${+m}`
+  try {
+    tasks = await apiGetTasks(iso)
+  } catch {
+    tasks = []
+  }
+  renderCalendar()
+  renderTasks()
+}
+
 async function addTask() {
-  const text = taskInput.value.trim()
+  const text = $('taskInput').value.trim()
   if (!text) return
-
-  taskInput.value = ''
-
+  $('taskInput').value = ''
   try {
     await apiCreateTask(text, selectedDate)
-    await fetchAndRender()
+    tasks = await apiGetTasks(selectedDate)
+    await loadMonthTasks()
+    renderCalendar()
+    renderTasks()
     renderChart()
   } catch {
-    taskInput.value = text
+    $('taskInput').value = text
     showError('Não foi possível adicionar a tarefa.')
   }
 }
 
-async function toggleTask(id, currentState) {
+async function toggleTask(id, current) {
   try {
-    await apiToggleTask(id, !currentState)
-    await fetchAndRender()
+    await apiToggleTask(id, !current)
+    tasks = await apiGetTasks(selectedDate)
+    renderTasks()
     renderChart()
   } catch {
     showError('Não foi possível atualizar a tarefa.')
@@ -203,7 +141,10 @@ async function toggleTask(id, currentState) {
 async function deleteTask(id) {
   try {
     await apiDeleteTask(id)
-    await fetchAndRender()
+    tasks = await apiGetTasks(selectedDate)
+    await loadMonthTasks()
+    renderCalendar()
+    renderTasks()
     renderChart()
   } catch {
     showError('Não foi possível excluir a tarefa.')
@@ -211,11 +152,12 @@ async function deleteTask(id) {
 }
 
 function renderTasks() {
-  taskList.innerHTML = ''
+  const list = $('taskList')
+  list.innerHTML = ''
 
   tasks.forEach(task => {
-    const li = document.createElement('li')
-    li.className = `task-item ${task.completed ? 'completed' : ''}`
+    const li   = document.createElement('li')
+    li.className = `task-item${task.completed ? ' completed' : ''}`
 
     const span = document.createElement('span')
     span.textContent = task.titulo
@@ -223,60 +165,168 @@ function renderTasks() {
     const btns = document.createElement('div')
     btns.className = 'task-btns'
 
-    const completeBtn = document.createElement('button')
-    completeBtn.className = 'btn-complete'
-    completeBtn.textContent = task.completed ? 'Desfazer' : 'OK'
-    completeBtn.addEventListener('click', () => toggleTask(task.id, task.completed))
+    const ok = document.createElement('button')
+    ok.className = 'btn-complete'
+    ok.textContent = task.completed ? 'Desfazer' : 'OK'
+    ok.onclick = () => toggleTask(task.id, task.completed)
 
-    const deleteBtn = document.createElement('button')
-    deleteBtn.className = 'btn-delete'
-    deleteBtn.textContent = 'Excluir'
-    deleteBtn.addEventListener('click', () => deleteTask(task.id))
+    const del = document.createElement('button')
+    del.className = 'btn-delete'
+    del.textContent = 'Excluir'
+    del.onclick = () => deleteTask(task.id)
 
-    btns.appendChild(completeBtn)
-    btns.appendChild(deleteBtn)
-    li.appendChild(span)
-    li.appendChild(btns)
-    taskList.appendChild(li)
+    btns.append(ok, del)
+    li.append(span, btns)
+    list.appendChild(li)
   })
 
-  const completedCount = tasks.filter(t => t.completed).length
-  counter.innerHTML = `Total no dia: <strong>${tasks.length}</strong> | Concluídas: <strong>${completedCount}</strong>`
+  const done = tasks.filter(t => t.completed).length
+  $('counter').innerHTML = tasks.length
+    ? `${tasks.length} tarefa${tasks.length > 1 ? 's' : ''} &mdash; <strong>${done}</strong> concluída${done !== 1 ? 's' : ''}`
+    : 'Nenhuma tarefa neste dia.'
 }
 
-async function fetchAndRender() {
+async function renderChart() {
+  const canvas = $('weekChart')
+  if (!canvas) return
+
+  const days = chartDays()
+  const from = days[0]
+  const to   = days[days.length - 1]
+
+  const [, fm, fd] = from.split('-')
+  const [, tm, td] = to.split('-')
+  $('chartRangeLabel').textContent = `${+fd}/${+fm} – ${+td}/${+tm}`
+
+  const nextBtn = $('chartNext')
+  nextBtn.style.opacity      = chartOffset === 0 ? '0.2' : '1'
+  nextBtn.style.pointerEvents = chartOffset === 0 ? 'none' : 'auto'
+
+  let raw = []
   try {
-    tasks = await apiGetTasks(selectedDate)
+    raw = await apiGetTasksRange(from, to)
   } catch {
-    tasks = []
-    showError('Erro ao carregar tarefas.')
+    return
   }
 
-  renderCalendar()
-  renderTasks()
+  const data = days.map(iso => ({
+    label:   (+iso.split('-')[2]).toString(),
+    total:   raw.filter(t => t.date === iso).length,
+    done:    raw.filter(t => t.date === iso && t.completed).length,
+    isToday: iso === toISODate(new Date())
+  }))
+
+  drawChart(canvas, data)
+}
+
+function drawChart(canvas, data) {
+  const wrap = canvas.parentElement
+  const dpr  = window.devicePixelRatio || 1
+  const w    = wrap.clientWidth
+  const h    = 120
+
+  canvas.width        = w * dpr
+  canvas.height       = h * dpr
+  canvas.style.width  = w + 'px'
+  canvas.style.height = h + 'px'
+
+  const ctx  = canvas.getContext('2d')
+  ctx.scale(dpr, dpr)
+  ctx.clearRect(0, 0, w, h)
+
+  const pL = 6, pR = 6, pT = 10, pB = 22
+  const cw = w - pL - pR
+  const ch = h - pT - pB
+  const n  = data.length
+  const maxV = Math.max(...data.map(d => d.total), 1)
+  const xs   = data.map((_, i) => pL + (n === 1 ? cw / 2 : (i / (n - 1)) * cw))
+  const yOf  = v => pT + ch - (v / maxV) * ch
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)'
+  ctx.lineWidth = 1
+  ;[0, 0.5, 1].forEach(t => {
+    const y = pT + ch * t
+    ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(pL + cw, y); ctx.stroke()
+  })
+
+  function area(vals, color) {
+    if (n < 2) return
+    ctx.beginPath()
+    vals.forEach((v, i) => i === 0 ? ctx.moveTo(xs[i], yOf(v)) : ctx.lineTo(xs[i], yOf(v)))
+    ctx.lineTo(xs[n - 1], pT + ch)
+    ctx.lineTo(xs[0], pT + ch)
+    ctx.closePath()
+    const g = ctx.createLinearGradient(0, pT, 0, pT + ch)
+    g.addColorStop(0, color.replace('rgb', 'rgba').replace(')', ',0.15)'))
+    g.addColorStop(1, color.replace('rgb', 'rgba').replace(')', ',0)'))
+    ctx.fillStyle = g
+    ctx.fill()
+  }
+
+  function line(vals, color, alpha) {
+    if (n < 2) return
+    ctx.beginPath()
+    vals.forEach((v, i) => i === 0 ? ctx.moveTo(xs[i], yOf(v)) : ctx.lineTo(xs[i], yOf(v)))
+    ctx.strokeStyle = color
+    ctx.globalAlpha = alpha
+    ctx.lineWidth   = 1.5
+    ctx.lineJoin    = 'round'
+    ctx.stroke()
+    ctx.globalAlpha = 1
+  }
+
+  area(data.map(d => d.total), 'rgb(255,255,255)')
+  area(data.map(d => d.done),  'rgb(0,230,118)')
+  line(data.map(d => d.total), 'rgba(255,255,255,0.2)', 1)
+  line(data.map(d => d.done),  '#00e676', 1)
+
+  data.forEach((d, i) => {
+    if (d.total > 0) {
+      ctx.beginPath()
+      ctx.arc(xs[i], yOf(d.total), 2.5, 0, Math.PI * 2)
+      ctx.fillStyle = 'rgba(255,255,255,0.35)'
+      ctx.fill()
+    }
+    if (d.done > 0) {
+      ctx.beginPath()
+      ctx.arc(xs[i], yOf(d.done), 2.5, 0, Math.PI * 2)
+      ctx.fillStyle = '#00e676'
+      ctx.fill()
+    }
+
+    ctx.fillStyle = d.isToday ? 'rgba(0,230,118,0.85)' : 'rgba(255,255,255,0.22)'
+    ctx.font      = `${d.isToday ? '600 ' : ''}10px system-ui`
+    ctx.textAlign = 'center'
+    ctx.fillText(d.label, xs[i], h - 5)
+  })
 }
 
 function showError(msg) {
-  const existing = document.getElementById('homeError')
-  if (existing) existing.remove()
-
+  const old = $('homeError')
+  if (old) old.remove()
   const el = document.createElement('p')
   el.id = 'homeError'
   el.textContent = msg
-  el.style.cssText = 'color:#ff5252;font-size:0.8rem;margin-bottom:0.75rem;'
-  taskList.before(el)
-
-  setTimeout(() => el.remove(), 3500)
+  el.style.cssText = 'color:#ff5252;font-size:0.8rem;margin-bottom:.75rem;'
+  $('taskList').before(el)
+  setTimeout(() => el.remove(), 3000)
 }
 
 function logout() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('userName')
-  localStorage.removeItem('userEmail')
+  localStorage.clear()
   window.location.href = './login.html'
 }
 
-window.addEventListener('resize', renderChart)
+let resizeTimer
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(renderChart, 120)
+})
 
-selectDate(toISODate(new Date()))
-renderChart()
+async function init() {
+  await loadMonthTasks()
+  await selectDate(toISODate(new Date()))
+  renderChart()
+}
+
+init()
