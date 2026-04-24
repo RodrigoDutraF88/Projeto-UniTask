@@ -12,8 +12,8 @@
 ![UniTask Preview](./docs/Screenshot3.png)
 ![UniTask Preview](./docs/Screenshot4.png)
 ![UniTask Preview](./docs/Screenshot1.png)
-![UniTask Preview](./docs/Screenshot2.png)
-![UniTask Preview](./docs/Screenshot5.png)
+
+
 
 ### Funcionalidades
 
